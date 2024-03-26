@@ -1,0 +1,81 @@
+#include <SoftwareSerial.h>
+
+// Define
+#define enA 9
+#define in1 4
+#define in2 5
+#define enB 10
+#define in3 6
+#define in4 7
+#define bluetoothTx 2
+#define bluetoothRx 3
+
+int motorSpeedA = 0;
+int motorSpeedB = 0;
+
+void setup() {
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+
+  // Initialize the serial communication for Bluetooth
+  Serial.begin(9600);
+  Serial1.begin(9600); // HC-05 module uses Serial1
+
+  // Set initial motor speeds to zero
+  analogWrite(enA, 0);
+  analogWrite(enB, 0);
+}
+
+void loop() {
+  // Read data from Bluetooth
+  if (Serial1.available()) {
+    char receivedChar = Serial1.read();
+    if (receivedChar == 'F') {
+      // Move forward
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, HIGH);
+      digitalWrite(in3, LOW);
+      digitalWrite(in4, HIGH);
+      motorSpeedA = 255;
+      motorSpeedB = 255;
+    } else if (receivedChar == 'B') {
+      // Move backward
+      digitalWrite(in1, HIGH);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, HIGH);
+      digitalWrite(in4, LOW);
+      motorSpeedA = 255;
+      motorSpeedB = 255;
+    } else if (receivedChar == 'L') {
+      // Turn left
+      analogWrite(enA, 200); // Increased left motor speed
+      analogWrite(enB, 255);
+      motorSpeedA = 200;
+      motorSpeedB = 255;
+    } else if (receivedChar == 'R') {
+      // Turn right
+      analogWrite(enA, 255);
+      analogWrite(enB, 200); // Increased right motor speed
+      motorSpeedA = 255;
+      motorSpeedB = 200;
+    } else if (receivedChar == 'S') {
+      // Stop
+      digitalWrite(in1, LOW);
+      digitalWrite(in2, LOW);
+      digitalWrite(in3, LOW);
+      digitalWrite(in4, LOW);
+      analogWrite(enA, 0);
+      analogWrite(enB, 0);
+      motorSpeedA = 0;
+      motorSpeedB = 0;
+    }
+  }
+
+  // Update motor speeds
+  analogWrite(enA, motorSpeedA);
+  analogWrite(enB, motorSpeedB);
+}
